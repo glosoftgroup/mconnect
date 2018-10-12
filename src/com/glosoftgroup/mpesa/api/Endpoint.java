@@ -26,8 +26,12 @@ public class Endpoint {
 
     public String getNewMPESATransactionsURL() {
 //        return BASE_URL.concat("/confirmation/");
-        return "http://127.0.0.1:8000/mpesa/transactions/api/list/test/?status=0";
-    }  
+        return "http://127.0.0.1:8000/mpesa/transactions/api/list/mconnect/?status=0";
+    }
+    
+    public String getChangeStatusURL(){
+        return "http://127.0.0.1:8000/mpesa/transactions/api/list/mconnect/status/";
+    }
     
     public String getBaseUrl(){
         return BASE_URL;
