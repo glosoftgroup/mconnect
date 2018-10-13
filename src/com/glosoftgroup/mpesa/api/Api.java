@@ -198,9 +198,9 @@ public class Api {
         
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         if(authorize)JWTAuthorize(con);
-        // optional default is GET
+        /* optional default Method is GET */
         con.setRequestMethod("GET");
-        //add request header
+        /* add request header */
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
         con.setRequestProperty("Content-Type", "application/json");
@@ -208,7 +208,9 @@ public class Api {
         con.setDoOutput(true);
         con.setUseCaches(false);
         con.setConnectTimeout(3000);
+        
         int responseCode = con.getResponseCode();
+        
         if(responseCode!=200){//not ok
             if(responseCode==401){//Unauthorized, so login again                
                 //new login().Relaunch(Main.home);
@@ -246,8 +248,8 @@ public class Api {
         try {
             
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            String inputLine;
             StringBuffer err = new StringBuffer();
+            String inputLine;
             
             while ((inputLine = in.readLine()) != null) {
                 err.append(inputLine);
@@ -279,31 +281,8 @@ public class Api {
         return "Sorry, we got an error!";
     }  
     
-    /** 
-     * TODO: Remove getNewTransactions() method after testing
-     */
-    public void getNewTransactions(ObservableList<Transaction>TransactionData){
-        TransactionData.clear();
-        log.info("fetching new transactions");
-        try {
-            URL url = new URL(Endpoint.getInstance().getNewMPESATransactionsURL());
-            String response = sendGet(url);
-            JSONParser parser=new JSONParser();
-            JSONObject objectData=(JSONObject) parser.parse(response);
-            JSONArray parseData = (JSONArray) objectData.get("request data");
-            /* remember to delete */
-            log.info(parseData.toJSONString());
-            parseData.stream().forEach(obj->{
-                    TransactionData.add(Transaction.fromJSON((JSONObject) obj));
-            });
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-            log.info("Error occured while fetching Transactions", ex);
-        }
-    }
-    
     public JSONArray getNewTransactions(){
-        log.info("fetching new transactions");
+        
         JSONArray parseData = new JSONArray();
         try {
             URL url = new URL(Endpoint.getInstance().getNewMPESATransactionsURL());
@@ -311,11 +290,8 @@ public class Api {
             JSONParser parser= new JSONParser();
             JSONObject objectData=(JSONObject) parser.parse(response);
             parseData = (JSONArray) objectData.get("results");
-            /* remember to delete */
-            log.info(parseData.toJSONString());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            log.info("Error occured while fetching Transactions", ex);
         }
         
         return parseData;
@@ -329,7 +305,7 @@ public class Api {
 
         try {
             items.clear();
-            String url = BaseUrl + "/api/transactions/?q="+URLEncoder.encode(needle,"UTF-8")+"&format=json";//+?q=needle&format=json
+            String url = BaseUrl + "/api/transactions/?q="+URLEncoder.encode(needle,"UTF-8")+"&format=json";
             URL obj = new URL(url);
             String response=sendGet(obj);
             JSONParser parser = new JSONParser();
