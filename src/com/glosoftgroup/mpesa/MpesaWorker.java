@@ -13,9 +13,7 @@ import com.glosoftgroup.mpesa.models.Transaction;
 import com.glosoftgroup.mpesa.utils.Logging;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -87,6 +85,15 @@ public class MpesaWorker {
         }
     }
     
+    /**
+     *  Gets all the new transactions and inserts them to the database.
+     * 
+     *  Tasks executed:
+     *       - Gets new Transactions using an endpoint
+     *       - Inserts the transactions to the database
+     *       - Sends the status of the insertion process with the
+     *         transaction ids to an endpoint
+     */
     public void executeTasks() throws SQLException{
         
         JSONArray results = Api.getInstance(log).getNewTransactions();        
@@ -102,7 +109,8 @@ public class MpesaWorker {
             
         Connection conn = mysql.getConnection();
         int[] result = null;
-        /* this query brings error if data exists, but the second one ignores the error but does not insert
+        String insertToDBtransacStatus = "success";
+        /* this query brings error if same data exists, but the second one ignores the error but does not insert
         String QUERY = "INSERT INTO mpesa_transactions_mpesatransactions ("
                     + "msisdn, "
                     + "first_name, " 
@@ -121,7 +129,7 @@ public class MpesaWorker {
                     + "created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         */
         
-        String QUERY = "INSERT INTO mpesa_transactions_mpesatransactionsx ("
+        String QUERY = "INSERT INTO mpesa_transactions_mpesatransactions ("
                     + "msisdn, "
                     + "first_name, " 
                     + "middle_name, " 
@@ -172,6 +180,7 @@ public class MpesaWorker {
                 conn.close();
                 System.out.println("End of Connection");
         } catch (SQLException e) {
+                insertToDBtransacStatus = "error";
                 log.error("SQLException ", e);
                 conn.rollback();
                 e.printStackTrace();
@@ -181,14 +190,32 @@ public class MpesaWorker {
         }
         
         int rs = result == null ? 0 : result.length;
-        System.out.println("Number of rows affected: "+ rs);
         log.info("Number of rows affected: "+ rs);
+        
+        /* send the ids and the status of the transactions */
+        sendTransactionInsertStatus(ids, insertToDBtransacStatus);
     }
     
-    public void failedTransactionsCallback(JSONArray ids){
-        JSONObject response = new JSONObject();
-        response.put("transaction_ids", ids);
+    /**
+     *  This method sends the status of the inserted transactions
+     * 
+     *  @param ids JSONArray: contains all transactions ids
+     *  @param status String: contains the error or success status of the transaction
+     */
+    public void sendTransactionInsertStatus(JSONArray ids, String status){
+        /* create a new JSON object for posting */
+        JSONObject postObject = new JSONObject();
+        postObject.put("transaction_ids", ids);
+        postObject.put("status", status);
         
-        /* post the failed transactions */
+        /* post transaction status and the get the return boolean value */
+        Boolean isPosted = Api.getInstance(log).postTransactionStatus(postObject);
+        
+        if(!isPosted){
+            log.error("Error posting the status of the inserted to db transactions");
+        }else{
+            log.info("success posting the status of the db insert transactions ");
+        }
+        
     }
 }

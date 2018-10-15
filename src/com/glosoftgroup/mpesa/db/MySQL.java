@@ -34,7 +34,7 @@ public final class MySQL {
      * Constructor.
      *
      * @param host the MySQL host machine
-     * @param port the port to use on the MySQL host machine
+     * @param port the port to use on the MySQL hosMySQLt machine
      * @param database the MySQL database name
      * @param user the MySQL user
      * @param password the MySQL password

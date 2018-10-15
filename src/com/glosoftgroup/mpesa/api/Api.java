@@ -11,13 +11,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import com.glosoftgroup.mpesa.models.Transaction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -41,7 +38,6 @@ public class Api {
     
     public static Api getInstance(Logging logging) {
         // define log if null
-//        log = log == null ? new Logging() : log;
         log = logging;
         return instance == null ? new Api(log) : instance;
     }
@@ -73,7 +69,7 @@ public class Api {
         return false;
     }
        
-     public boolean login(String username, String pass) {
+    public boolean login(String username, String pass) {
         JSONObject user = new JSONObject();
         user.put("email", username);
         user.put("password", pass);
@@ -126,11 +122,14 @@ public class Api {
      /* end of postdata with label inside */
     // HTTP POST request
     public String PostData(String json_data,String type) throws Exception {
-        boolean exit=false;
-        String request="POST";
+        boolean exit = false;
+        String request = "POST";
         String url = "";
         if(type.equalsIgnoreCase("login")){ 
             url = Endpoint.getInstance().getLOGIN();
+        }
+        else if(type.equalsIgnoreCase("transaction-status")){ 
+            url = Endpoint.getInstance().getTransactionStatusCallbackURL();
         }
         
         URL obj = new URL(url);
@@ -140,7 +139,7 @@ public class Api {
             log.info(e.getMessage(),e);
         }
         
-        //add reuqest header
+        //add request header
         con.setRequestMethod(request);
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
@@ -281,15 +280,19 @@ public class Api {
         return "Sorry, we got an error!";
     }  
     
+    /**
+     *  This method gets all the new Mpesa Transactions with a status of 0
+     */
     public JSONArray getNewTransactions(){
         
         JSONArray parseData = new JSONArray();
         try {
             URL url = new URL(Endpoint.getInstance().getNewMPESATransactionsURL());
             String response = sendGet(url);
-            JSONParser parser= new JSONParser();
-            JSONObject objectData=(JSONObject) parser.parse(response);
-            parseData = (JSONArray) objectData.get("results");
+            JSONParser parser = new JSONParser();
+//            JSONObject objectData = (JSONObject) parser.parse(response);
+//            parseData = (JSONArray) objectData.get("results");
+            parseData = (JSONArray) parser.parse(response);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -297,34 +300,41 @@ public class Api {
         return parseData;
     }
     
-    
-    /** not really needed for the daemon
-     *  but can be used for the restaurant
+    /**
+     *  This posts the DB insertion status of the transactions polled
+     * 
+     *  @param postObject JSONObject: contains,
+     *                    1. array of transaction ids
+     *                    2. status of the transactions insert to db
+     * 
+     *  @return boolean: true if post was successful else false
      */
-    public void searchTransaction(String needle, ObservableList<Transaction> items){
-
+    public boolean postTransactionStatus(JSONObject postObject){
+        
+        String PostData = "{}";
         try {
-            items.clear();
-            String url = BaseUrl + "/api/transactions/?q="+URLEncoder.encode(needle,"UTF-8")+"&format=json";
-            URL obj = new URL(url);
-            String response=sendGet(obj);
-            JSONParser parser = new JSONParser();
-            Object objt = parser.parse(response);
-            JSONArray dataArray = (JSONArray) objt;
-           
-            dataArray.stream().forEach(data->{
-                items.add(Transaction.fromJSON((JSONObject) data));
-            });
-
-        } catch (Exception e) { 
-            e.printStackTrace();
-            log.error(e.getMessage(), e);
+            PostData = PostData(postObject.toJSONString(), "transaction-status");
+        } catch (Exception ex) {
+            log.info(ex.getMessage(), ex);
+            return false;
         }
         
+        /* retrieve the response*/
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject response = new JSONObject();
+            response = (JSONObject) parser.parse(PostData); 
+            log.info(response.get("message").toString());
+        } catch (ParseException ex) {
+            log.info(ex.getMessage(), ex);
+            return false;
+        }
+        
+        return true;
     }
     
     private void JWTAuthorize(HttpURLConnection con){
-        con.setRequestProperty("Authorization","JWT "+ MyPreferences.getInstance().getUser().getToken());
-        System.out.println("token:-"+MyPreferences.getInstance().getUser().getToken());
+        con.setRequestProperty("Authorization","token "+ MyPreferences.getInstance().getToken());
+        System.out.println("token:-"+MyPreferences.getInstance().getToken());
     }
 }
