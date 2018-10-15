@@ -66,4 +66,8 @@ public class MyPreferences {
         prefs.put("permissions", this.permissions);
     }
     
+    public String getToken(){
+        return "f186d8d1eb6dea96882f76c057e98bee24ae4d4d";
+    }
+    
 }

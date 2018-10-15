@@ -4,10 +4,7 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/kiburu/Desktop/work/backend/glosoftgroup/mpesa_daemon/src/com/glosoftgroup/mpesa/MpesaDaemon.java</file>
-            <file>file:/home/kiburu/Desktop/work/backend/glosoftgroup/mpesa_daemon/src/com/glosoftgroup/mpesa/models/Transaction.java</file>
             <file>file:/home/kiburu/Desktop/work/backend/glosoftgroup/mpesa_daemon/src/com/glosoftgroup/mpesa/MpesaWorker.java</file>
-            <file>file:/home/kiburu/Desktop/work/backend/glosoftgroup/mpesa_daemon/src/com/glosoftgroup/mpesa/api/Endpoint.java</file>
-            <file>file:/home/kiburu/Desktop/work/backend/glosoftgroup/mpesa_daemon/src/com/glosoftgroup/mpesa/api/Api.java</file>
             <file>file:/home/kiburu/Desktop/work/backend/glosoftgroup/mpesa_daemon/src/com/glosoftgroup/mpesa/db/MySQL.java</file>
         </group>
     </open-files>
