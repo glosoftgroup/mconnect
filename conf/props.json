@@ -1,0 +1,18 @@
+{
+    "urls" : {
+        "newPaymentTransactionUrl" : "http://localhost:8090/api/payments/?status=0",
+	"transactionStatusCallbackURL" : "http://localhost:8090/api/payments/"
+	},
+    "database":{
+        "DbPoolName": "restaurant",
+    	"DbUserName": "restaurant",
+    	"DbPassword": "restaurant",
+        "DbName" : "restaurant",
+    	"DbHost": "127.0.0.1",
+    	"DbPort": "5432"
+    },
+    "InfoLogLevel" : "INFO",
+    "ErrorLogLevel" : "ERROR",
+    "InfoLogFile" : "path/to/info.log",
+    "ErrorLogFile" : "path/to/error.log"
+}

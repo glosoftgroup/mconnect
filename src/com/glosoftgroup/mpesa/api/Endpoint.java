@@ -14,7 +14,7 @@ public class Endpoint {
      
     public Endpoint() {
         /* change the BASE_URL accordingly */
-        BASE_URL = "http://127.0.0.1:8000/";
+        BASE_URL = "http://localhost:8090/";
     }
     
     public static Endpoint getInstance() {
@@ -30,7 +30,6 @@ public class Endpoint {
          *  This endpoint is used to poll new mpesa transactions with
          *  a status of 0
          */
-//        return BASE_URL.concat("mpesa/transactions/api/list/mconnect/?status=0");
         return "http://localhost:8090/api/payments/?status=0";
     }
     
@@ -39,7 +38,6 @@ public class Endpoint {
          *  This endpoint is used to send the status transaction which
          *  determines if the transactions will be polled again or not
          */
-//        return BASE_URL.concat("mpesa/transactions/api/list/mconnect/status/");
         return "http://localhost:8090/api/payments/";
     }
     

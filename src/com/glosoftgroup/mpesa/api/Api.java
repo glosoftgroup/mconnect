@@ -11,17 +11,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.glosoftgroup.mpesa.utils.Logging;
-import com.glosoftgroup.mpesa.models.User;
 import com.glosoftgroup.mpesa.utils.MyPreferences;
 
 /**
@@ -69,57 +64,7 @@ public class Api {
         return false;
     }
        
-    public boolean login(String username, String pass) {
-        JSONObject user = new JSONObject();
-        user.put("email", username);
-        user.put("password", pass);
-        String PostData = "{}";
-        try {
-            PostData = PostData(user.toJSONString(), "login");
-        } catch (Exception ex) { 
-            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-            log.info(ex.getMessage(), ex);
-            return false;
-        }
 
-        System.err.println("post data"+PostData);
-        //return true;
-        JSONParser parser = new JSONParser();
-        JSONObject res = new JSONObject();
-        try {
-            res = (JSONObject) parser.parse(PostData);
-        } catch (ParseException ex) {
-            log.info(ex.getMessage(), ex);
-            return false;
-        }
-
-        if (res.get("token") != null) {
-            //go home and initialize the user and terminal
-            JSONObject jsonuser = (JSONObject) res.get("user");
-            User me = new User(
-                    jsonuser.get("id") != null ? jsonuser.get("id").toString() : "",
-                    jsonuser.get("name") != null ? jsonuser.get("name").toString() : "N/A",
-                    jsonuser.get("code") != null ? jsonuser.get("code").toString() : "00000",
-                    jsonuser.get("email") != null ? jsonuser.get("email").toString() : username,
-                    jsonuser.get("password") != null ? jsonuser.get("password").toString() : pass,
-                    jsonuser.get("position") != null ? jsonuser.get("position").toString() : "Teller",
-                    res.get("token").toString()
-            );
-            MyPreferences.getInstance().setUser(me);
-            return true;
-        } else {
-            String Error = res.get("error") != null ? res.get("error").toString() : "Some Error occured";
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText(Error);
-                alert.show();
-            });
-            log.info("Error getting the token");
-        }
-        return false;
-    }
-
-     /* end of postdata with label inside */
     // HTTP POST request
     public String PostData(String json_data,String type) throws Exception {
         boolean exit = false;
@@ -146,7 +91,7 @@ public class Api {
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("Accept", "application/json");
         con.setConnectTimeout(3000);
-        JWTAuthorize(con);
+        TokenAuthorize(con);
         String urlParameters = json_data;
 
         // Send post request
@@ -196,7 +141,7 @@ public class Api {
         log.info("REQUEST { \"Method\": GET, \"url\": "+url+" }");
         
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        if(authorize)JWTAuthorize(con);
+        if(authorize)TokenAuthorize(con);
         /* optional default Method is GET */
         con.setRequestMethod("GET");
         /* add request header */
@@ -233,7 +178,6 @@ public class Api {
             in.close();
         }
         
-        System.err.println(response);
         log.info("RESPONSE { \"Method\": GET, \"body\": "+response+" }");
         return response.toString();
     }
@@ -290,8 +234,6 @@ public class Api {
             URL url = new URL(Endpoint.getInstance().getNewMPESATransactionsURL());
             String response = sendGet(url);
             JSONParser parser = new JSONParser();
-//            JSONObject objectData = (JSONObject) parser.parse(response);
-//            parseData = (JSONArray) objectData.get("results");
             parseData = (JSONArray) parser.parse(response);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -319,7 +261,7 @@ public class Api {
             return false;
         }
         
-        /* retrieve the response*/
+        /* retrieve the response */
         try {
             JSONParser parser = new JSONParser();
             JSONObject response = new JSONObject();
@@ -333,8 +275,7 @@ public class Api {
         return true;
     }
     
-    private void JWTAuthorize(HttpURLConnection con){
+    private void TokenAuthorize(HttpURLConnection con){
         con.setRequestProperty("Authorization","token "+ MyPreferences.getInstance().getToken());
-        System.out.println("token:-"+MyPreferences.getInstance().getToken());
     }
 }
