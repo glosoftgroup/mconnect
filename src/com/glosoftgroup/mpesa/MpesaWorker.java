@@ -65,7 +65,6 @@ public class MpesaWorker {
             executeTasks();
         }catch(SQLException ex){
             log.error(logPreString + "SQLException: " + ex.getMessage());
-            System.out.println(ex);
         }
     }
 
@@ -178,7 +177,7 @@ public class MpesaWorker {
                 conn.commit();
                 stmt.close();
                 conn.close();
-                System.out.println("End of Connection");
+                log.info("End of Connection");
         } catch (SQLException e) {
                 insertToDBtransacStatus = "error";
                 log.error("SQLException ", e);

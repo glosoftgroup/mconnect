@@ -16,6 +16,7 @@ import com.glosoftgroup.mpesa.db.MySQL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.glosoftgroup.mpesa.utils.Logging;
+import com.glosoftgroup.mpesa.utils.Props;
 
 
 /**
@@ -34,7 +35,6 @@ public class MpesaDaemon {
      */
     private transient boolean working = false;
 
-//    private static MySQL mySQL;
     /**
      * Logger for this application.
      */
@@ -46,7 +46,7 @@ public class MpesaDaemon {
     /**
      * Properties instance.
      */
-//    private static Props props;
+    private static Props props;
     private static MySQL mySQL;
 
     public MpesaDaemon() {
@@ -59,19 +59,15 @@ public class MpesaDaemon {
             log = new Logging();
             log.info("Initializing Mpesa daemon...");
             
-            /**
-             * Tell user on terminal the daemon is running
-             */
-            System.out.println("Initializing Mpesa daemon..... ");
-
+            props = new Props();
 
             try {
-//                mySQL = new MySQL(props.getDbHost(), props.getDbPort(),
-//                        props.getDbName(), props.getDbUserName(),
-//                        props.getDbPassword(), props.getDbPoolName(), 20);
-                mySQL = new MySQL("localhost", "5432",
-                        "restaurant", "restaurant",
-                        "restaurant", "restaurant", 20);
+                mySQL = new MySQL(props.getDbHost(), props.getDbPort(),
+                        props.getDbName(), props.getDbUserName(),
+                        props.getDbPassword(), props.getDbPoolName(), 20);
+//                mySQL = new MySQL("localhost", "5432",
+//                        "restaurant", "restaurant",
+//                        "restaurant", "restaurant", 20);
             } catch (Exception ex) {
                 Logger.getLogger(MpesaDaemon.class.getName())
                         .log(Level.SEVERE, null, ex);
@@ -101,12 +97,6 @@ public class MpesaDaemon {
 
         working = false;
         //check current pool shutdown and wait to complete task before shutdown
-        
-        /**
-         * Tell user on terminal the daemon is running
-         */
-        System.out.println("Mpesa daemon stopped..... ");
-
     }
 
     public void destroy() {
@@ -119,10 +109,7 @@ public class MpesaDaemon {
      */
     public static void main(String[] args) {
         init();
-        /**
-         * Tell user on terminal the daemon is running
-         */
-        System.out.println("Mpesa daemon running..... ");
+        log.info("Mpesa daemon running..... ");
         while (true) {
             try {
                 mpesaWorker.runDaemon();
