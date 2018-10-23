@@ -1,5 +1,6 @@
 # Dist folder
 dist/
+build/
 # Compiled class file
 *.class
 
